@@ -10,6 +10,36 @@ enum TaskType {
   studying,
 }
 
+extension RepeatExtension on Repeat {
+  String toJson() {
+    switch (this) {
+      case Repeat.none:
+        return 'なし';
+      case Repeat.daily:
+        return '毎日';
+      case Repeat.weekly:
+        return '毎週';
+      case Repeat.monthly:
+        return '毎月';
+      default:
+        return 'なし';
+    }
+  }
+}
+
+extension TaskTypeExtension on TaskType {
+  String toJson() {
+    switch (this) {
+      case TaskType.reading:
+        return '読書';
+      case TaskType.studying:
+        return '勉強';
+      default:
+        return '読書';
+    }
+  }
+}
+
 class Task {
   final String title;
   final DateTime date;
@@ -48,9 +78,9 @@ class Task {
   }
 
   // 時刻比較
-  int _compareTimes(String time1, String time2) {
-    final time1Parts = time1.split(':').map(int.parse).toList();
-    final time2Parts = time2.split(':').map(int.parse).toList();
+  int _compareTimes(String startTime, String endTime) {
+    final time1Parts = startTime.split(':').map(int.parse).toList();
+    final time2Parts = endTime.split(':').map(int.parse).toList();
 
     final minutes1 = time1Parts[0] * 60 + time1Parts[1];
     final minutes2 = time2Parts[0] * 60 + time2Parts[1];
@@ -65,7 +95,7 @@ class Task {
       'date': date.toIso8601String(),
       'startTime': startTime,
       'endTime': endTime,
-      'repeat': repeat.name,
+      'repeat': repeat,
       'taskType': taskType,
       'location': location,
       'alarm': alarm,
@@ -80,8 +110,7 @@ class Task {
       date: DateTime.parse(json['date']),
       startTime: json['startTime'],
       endTime: json['endTime'],
-      repeat: Repeat.values.firstWhere((e) => e.name == json['repeat'],
-          orElse: () => Repeat.none),
+      repeat: json['repeat'],
       taskType: json['taskType'],
       location: json['location'],
       alarm: json['alarm'],

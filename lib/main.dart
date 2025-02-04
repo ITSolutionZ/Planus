@@ -51,23 +51,17 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages[_currentIndex],
-      bottomNavigationBar: CustomBottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTabSelected: (index) {
-          if (index != -1) {
+    return SingleChildScrollView(
+      child: Scaffold(
+        body: _pages[_currentIndex],
+        bottomNavigationBar: CustomBottomNavigationBar(
+          currentIndex: _currentIndex,
+          onTabSelected: (index) {
             setState(() {
               _currentIndex = index;
             });
-          } else {
-            // FAB button-> newtask 移動
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const NewTaskScreen()),
-            );
-          }
-        },
+          },
+        ),
       ),
     );
   }

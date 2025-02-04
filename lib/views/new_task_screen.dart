@@ -10,56 +10,65 @@ class NewTaskScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => NewTaskViewModel(),
-      child: Scaffold(
-        backgroundColor: const Color(0xFFFDF3E7),
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          title: const Text(
-            'カレンダー',
-            style: TextStyle(
-                color: Colors.black, fontSize: 24, fontWeight: FontWeight.bold),
+    return SingleChildScrollView(
+      child: ChangeNotifierProvider(
+        create: (_) => NewTaskViewModel(),
+        child: Scaffold(
+          backgroundColor: const Color(0xFFFDF3E7),
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            title: const Text(
+              'カレンダー',
+              style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold),
+            ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.notifications, color: Colors.black),
+                onPressed: () {},
+              ),
+              IconButton(
+                icon: const Icon(Icons.person, color: Colors.black),
+                onPressed: () {},
+              ),
+            ],
           ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.notifications, color: Colors.black),
-              onPressed: () {},
+          body: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Consumer<NewTaskViewModel>(
+              builder: (context, viewModel, _) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    _buildCalendar(
+                      context,
+                      viewModel,
+                    ),
+                    _buildTimePicker(context, 'Starts', viewModel.startTime,
+                        true, viewModel),
+                    _buildTimePicker(
+                        context, 'Ends', viewModel.endTime, false, viewModel),
+                    _buildRepeatPicker(context, viewModel),
+                    _buildTaskTypePicker(context, viewModel),
+                    _buildLocationPicker(context, viewModel),
+                    _buildAlarmPicker(context, viewModel),
+                    const Spacer(),
+                    CustomButton(
+                      text: 'Save',
+                      onPressed: () {
+                        viewModel.saveTask();
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ],
+                );
+              },
             ),
-            IconButton(
-              icon: const Icon(Icons.person, color: Colors.black),
-              onPressed: () {},
-            ),
-          ],
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Consumer<NewTaskViewModel>(
-            builder: (context, viewModel, _) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildCalendar(context, viewModel),
-                  _buildTimePicker(
-                      context, 'Starts', viewModel.startTime, true, viewModel),
-                  _buildTimePicker(
-                      context, 'Ends', viewModel.endTime, false, viewModel),
-                  _buildRepeatPicker(context, viewModel),
-                  _buildTaskTypePicker(context, viewModel),
-                  _buildLocationPicker(context, viewModel),
-                  _buildAlarmPicker(context, viewModel),
-                  const Spacer(),
-                  CustomButton(
-                    text: 'Save',
-                    onPressed: () {
-                      viewModel.saveTask();
-                      Navigator.pop(context);
-                    },
-                  ),
-                ],
-              );
-            },
           ),
         ),
       ),
@@ -68,9 +77,7 @@ class NewTaskScreen extends StatelessWidget {
 
   Widget _buildCalendar(BuildContext context, NewTaskViewModel viewModel) {
     return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: TableCalendar(
@@ -81,22 +88,6 @@ class NewTaskScreen extends StatelessWidget {
           onDaySelected: (selectedDay, focusedDay) {
             viewModel.setDate(selectedDay);
           },
-          headerStyle: const HeaderStyle(
-            formatButtonVisible: false,
-            titleCentered: true,
-            leftChevronIcon: Icon(Icons.chevron_left, color: Colors.orange),
-            rightChevronIcon: Icon(Icons.chevron_right, color: Colors.orange),
-          ),
-          calendarStyle: const CalendarStyle(
-            todayDecoration: BoxDecoration(
-              color: Color(0xFFFFF3C5),
-              shape: BoxShape.circle,
-            ),
-            selectedDecoration: BoxDecoration(
-              color: Color(0xFFF5C869),
-              shape: BoxShape.circle,
-            ),
-          ),
         ),
       ),
     );
@@ -108,10 +99,8 @@ class NewTaskScreen extends StatelessWidget {
       title: Text(label, style: const TextStyle(color: Colors.orange)),
       trailing: Text(time.format(context)),
       onTap: () async {
-        TimeOfDay? pickedTime = await showTimePicker(
-          context: context,
-          initialTime: time,
-        );
+        TimeOfDay? pickedTime =
+            await showTimePicker(context: context, initialTime: time);
         if (pickedTime != null) {
           isStart
               ? viewModel.setStartTime(pickedTime)
@@ -127,94 +116,78 @@ class NewTaskScreen extends StatelessWidget {
       trailing: DropdownButton<Repeat>(
         value: viewModel.repeat,
         items: Repeat.values
-            .map((repeat) => DropdownMenuItem(
-                  value: repeat,
-                  child: Text(repeat.name),
-                ))
+            .map((repeat) =>
+                DropdownMenuItem(value: repeat, child: Text(repeat.name)))
             .toList(),
         onChanged: (value) {
-          if (value != null) {
-            viewModel.setRepeat(value);
-          }
+          if (value != null) viewModel.setRepeat(value);
         },
       ),
     );
   }
 
-  Widget _buildAlarmPicker(BuildContext context, NewTaskViewModel viewModel) {
+  Widget _buildTaskTypePicker(
+      BuildContext context, NewTaskViewModel viewModel) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        _buildTaskTypeButton(
+            context, TaskType.reading, Colors.orange, viewModel),
+        _buildTaskTypeButton(
+            context, TaskType.studying, Colors.green, viewModel),
+      ],
+    );
+  }
+
+  Widget _buildTaskTypeButton(BuildContext context, TaskType type, Color color,
+      NewTaskViewModel viewModel) {
+    return ElevatedButton(
+      onPressed: () => viewModel.setTaskType(type),
+      style: ElevatedButton.styleFrom(backgroundColor: color),
+      child: Text(type.name),
+    );
+  }
+
+  Widget _buildLocationPicker(
+      BuildContext context, NewTaskViewModel viewModel) {
     return ListTile(
-      leading: const Icon(Icons.alarm, color: Colors.orange),
-      title: const Text('アラーム設定', style: TextStyle(color: Colors.orange)),
-      trailing: Text(viewModel.alarm ?? '未設定'),
+      title: const Text('場所選択', style: TextStyle(color: Colors.orange)),
+      trailing: Text(viewModel.location ?? '未設定'),
       onTap: () async {
-        TimeOfDay? pickedTime = await showTimePicker(
-          context: context,
-          initialTime: TimeOfDay.now(),
-        );
-        if (context.mounted && pickedTime != null) {
-          viewModel.setAlarm(context, pickedTime);
-        }
+        viewModel.setLocation('指定した場所');
       },
     );
   }
 }
 
-Widget _buildTaskTypePicker(BuildContext context, NewTaskViewModel viewModel) {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-    children: [
-      _buildTaskTypeButton(context, TaskType.reading, Colors.orange, viewModel),
-      _buildTaskTypeButton(context, TaskType.studying, Colors.green, viewModel),
-    ],
-  );
-}
-
-Widget _buildTaskTypeButton(BuildContext context, TaskType type, Color color,
-    NewTaskViewModel viewModel) {
-  return ElevatedButton(
-    onPressed: () => viewModel.setTaskType(type as String),
-    style: ElevatedButton.styleFrom(
-      backgroundColor: viewModel.taskType == type ? color : Colors.grey[300],
-    ),
-    child: Text(type.name),
-  );
-}
-
-Widget _buildLocationPicker(BuildContext context, NewTaskViewModel viewModel) {
+Widget _buildAlarmPicker(BuildContext context, NewTaskViewModel viewModel) {
   return ListTile(
-    leading: const Icon(Icons.location_on, color: Colors.orange),
-    title: const Text('場所選択', style: TextStyle(color: Colors.orange)),
-    trailing: Text(viewModel.location ?? '未設定'), // 未設定可能
+    title: const Text('アラーム', style: TextStyle(color: Colors.orange)),
+    trailing: Text(
+      viewModel.alarm != null
+          ? _formatAlarmTime(context, viewModel.alarm!)
+          : '未設定',
+    ),
     onTap: () async {
-      String? selectedLocation = await _showLocationDialog(context);
-      if (selectedLocation != null) {
-        viewModel.setLocation(selectedLocation);
+      TimeOfDay? pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.now(),
+      );
+
+      if (pickedTime != null && context.mounted) {
+        viewModel.setAlarm(context, pickedTime);
       }
     },
   );
 }
 
-Future<String?> _showLocationDialog(BuildContext context) async {
-  TextEditingController controller = TextEditingController();
-  return showDialog<String>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('場所'),
-      content: TextField(controller: controller),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, null), // キャンセル時はnull
-          child: const Text('キャンセル'),
-        ),
-        TextButton(
-          onPressed: () => Navigator.pop(
-              context,
-              controller.text.isEmpty
-                  ? null
-                  : controller.text), // 空文字の場合はnull処理
-          child: const Text('保存'),
-        ),
-      ],
-    ),
-  );
+// 現在、AlarmはString型で保存されているため、TimeOfDay型に変換する必要がある。
+String _formatAlarmTime(BuildContext context, String alarm) {
+  List<String> timeParts = alarm.split(":");
+  if (timeParts.length == 2) {
+    int hour = int.parse(timeParts[0]);
+    int minute = int.parse(timeParts[1]);
+    return TimeOfDay(hour: hour, minute: minute).format(context);
+  }
+  return '未設定';
 }

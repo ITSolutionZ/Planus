@@ -6,27 +6,21 @@ class NewTaskViewModel extends ChangeNotifier {
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _startTime = const TimeOfDay(hour: 9, minute: 0);
   TimeOfDay _endTime = const TimeOfDay(hour: 18, minute: 0);
-  Repeat _repeat = Repeat.weekly;
-  String _taskType = '読書';
+  Repeat _repeat = Repeat.none;
+  TaskType _taskType = TaskType.reading;
   String? _location;
   String? _alarm;
 
+  // Getter
   DateTime get selectedDate => _selectedDate;
   TimeOfDay get startTime => _startTime;
   TimeOfDay get endTime => _endTime;
   Repeat get repeat => _repeat;
-  String get taskType => _taskType;
+  TaskType get taskType => _taskType;
   String? get location => _location;
   String? get alarm => _alarm;
 
-  NewTaskViewModel() {
-    _initializeNotifications();
-  }
-
-  Future<void> _initializeNotifications() async {
-    await LocalNotificationsHelper.initialize();
-  }
-
+  // Setter
   void setDate(DateTime date) {
     _selectedDate = date;
     notifyListeners();
@@ -42,12 +36,12 @@ class NewTaskViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setRepeat(Repeat repeatOption) {
-    _repeat = repeatOption;
+  void setRepeat(Repeat repeat) {
+    _repeat = repeat;
     notifyListeners();
   }
 
-  void setTaskType(String type) {
+  void setTaskType(TaskType type) {
     _taskType = type;
     notifyListeners();
   }
@@ -57,18 +51,16 @@ class NewTaskViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setAlarm(BuildContext context, TimeOfDay alarmTime) {
+  void setAlarm(BuildContext context, TimeOfDay time) {
     _alarm =
-        '${alarmTime.hour.toString().padLeft(2, '0')}:${alarmTime.minute.toString().padLeft(2, '0')}';
-// error checking
-    debugPrint("setting repeat : $_repeat");
+        '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 
     LocalNotificationsHelper.scheduleNotification(
       context,
-      1,
+      1, // id
       "タスクリマインダー",
       "予定されたタスクの時間です！",
-      alarmTime,
+      time,
       _repeat,
     );
 
@@ -77,18 +69,15 @@ class NewTaskViewModel extends ChangeNotifier {
 
   void saveTask() {
     Task newTask = Task(
-      title: _taskType,
+      title: "New Task",
       date: _selectedDate,
-      startTime:
-          '${_startTime.hour.toString().padLeft(2, '0')}:${_startTime.minute.toString().padLeft(2, '0')}',
-      endTime:
-          '${_endTime.hour.toString().padLeft(2, '0')}:${_endTime.minute.toString().padLeft(2, '0')}',
+      startTime: '${_startTime.hour}:${_startTime.minute}',
+      endTime: '${_endTime.hour}:${_endTime.minute}',
       repeat: _repeat,
-      taskType: _taskType,
+      taskType: _taskType.name,
       location: _location,
       alarm: _alarm,
     );
-
-    debugPrint("Task Saved: ${newTask.toJson()}");
+    debugPrint("Saved Task: ${newTask.toJson()}");
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../views/new_task_screen.dart';
 
 class CustomBottomNavigationBar extends StatelessWidget {
   final int currentIndex;
@@ -56,11 +57,15 @@ class CustomBottomNavigationBar extends StatelessWidget {
             ],
           ),
         ),
+        // FAB button for new task
         Positioned(
           bottom: fabPosition,
           child: FloatingActionButton(
             onPressed: () {
-              onTabSelected(-1);
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const NewTaskScreen()));
             },
             backgroundColor: const Color(0xFFBCE4A3),
             child: const Icon(Icons.add, size: 30, color: Colors.white),
