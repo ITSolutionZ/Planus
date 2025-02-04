@@ -6,7 +6,7 @@ import 'package:planus/views/splash_screen.dart';
 import 'package:planus/views/new_task_screen.dart';
 import 'package:planus/viewmodels/new_task_viewmodel.dart';
 import 'package:planus/utils/local_notifications_helper.dart';
-import 'components/custom_bottom_navigation.dart';
+import 'components/custom_bottom_navigator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

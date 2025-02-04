@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../views/new_task_screen.dart';
+import 'package:planus/views/new_task_screen.dart';
 
-class CustomBottomNavigationBar extends StatelessWidget {
+class CustomBottomNavigationBar extends StatefulWidget {
   final int currentIndex;
   final ValueChanged<int> onTabSelected;
   final double fabPosition;
@@ -13,6 +13,12 @@ class CustomBottomNavigationBar extends StatelessWidget {
     this.fabPosition = 15,
   });
 
+  @override
+  _CustomBottomNavigationBarState createState() =>
+      _CustomBottomNavigationBarState();
+}
+
+class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -33,39 +39,47 @@ class CustomBottomNavigationBar extends StatelessWidget {
                 context,
                 index: 0,
                 icon: Icons.home,
-                isSelected: currentIndex == 0,
+                isSelected: widget.currentIndex == 0,
               ),
               _buildTabIcon(
                 context,
                 index: 1,
                 icon: Icons.calendar_today,
-                isSelected: currentIndex == 1,
+                isSelected: widget.currentIndex == 1,
               ),
               const SizedBox(width: 60), // floating button space
               _buildTabIcon(
                 context,
                 index: 2,
                 icon: Icons.people,
-                isSelected: currentIndex == 2,
+                isSelected: widget.currentIndex == 2,
               ),
               _buildTabIcon(
                 context,
                 index: 3,
                 icon: Icons.settings,
-                isSelected: currentIndex == 3,
+                isSelected: widget.currentIndex == 3,
               ),
             ],
           ),
         ),
         // FAB button for new task
         Positioned(
-          bottom: fabPosition,
+          bottom: widget.fabPosition,
           child: FloatingActionButton(
             onPressed: () {
-              Navigator.push(
+              // debugPrint('FAB button tapped');
+              if (context.mounted) {
+                // debugPrint('navigator is mounted');
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text('mounted & navigator waited')));
+                Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const NewTaskScreen()));
+                    builder: (context) => const NewTaskScreen(),
+                  ),
+                );
+              }
             },
             backgroundColor: const Color(0xFFBCE4A3),
             child: const Icon(Icons.add, size: 30, color: Colors.white),
@@ -78,7 +92,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
   Widget _buildTabIcon(BuildContext context,
       {required int index, required IconData icon, required bool isSelected}) {
     return GestureDetector(
-      onTap: () => onTabSelected(index),
+      onTap: () => widget.onTabSelected(index),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(8.0),

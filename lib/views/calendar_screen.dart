@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:planus/views/home_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
-import '../components/custom_bottom_navigation.dart';
+import '../components/custom_bottom_navigator.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:planus/views/calendar_screen.dart';
-import '../components/custom_bottom_navigation.dart';
+import '../components/custom_bottom_navigator.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
