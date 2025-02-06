@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../models/task_model.dart';
-import '../utils/local_notifications_helper.dart';
 
 class NewTaskViewModel extends ChangeNotifier {
   DateTime _selectedDate = DateTime.now();
@@ -9,16 +8,18 @@ class NewTaskViewModel extends ChangeNotifier {
   Repeat _repeat = Repeat.none;
   TaskType _taskType = TaskType.reading;
   String? _location;
-  String? _alarm;
+  TimeOfDay? _alarm;
+  final List<Task> _tasks = [];
 
   // Getter
   DateTime get selectedDate => _selectedDate;
+  List<Task> get tasks => _tasks;
   TimeOfDay get startTime => _startTime;
   TimeOfDay get endTime => _endTime;
   Repeat get repeat => _repeat;
   TaskType get taskType => _taskType;
   String? get location => _location;
-  String? get alarm => _alarm;
+  TimeOfDay? get alarm => _alarm;
 
   // Setter
   void setDate(DateTime date) {
@@ -27,12 +28,17 @@ class NewTaskViewModel extends ChangeNotifier {
   }
 
   void setStartTime(TimeOfDay time) {
-    _startTime = time;
+    _startTime =
+        '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}'
+            as TimeOfDay;
     notifyListeners();
   }
 
   void setEndTime(TimeOfDay time) {
-    _endTime = time;
+    _endTime =
+        '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}'
+            as TimeOfDay;
+
     notifyListeners();
   }
 
@@ -46,24 +52,13 @@ class NewTaskViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setLocation(String? loc) {
+  void setLocation(String loc) {
     _location = loc;
     notifyListeners();
   }
 
   void setAlarm(BuildContext context, TimeOfDay time) {
-    _alarm =
-        '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
-
-    LocalNotificationsHelper.scheduleNotification(
-      context,
-      1, // id
-      "タスクリマインダー",
-      "予定されたタスクの時間です！",
-      time,
-      _repeat,
-    );
-
+    _alarm = time;
     notifyListeners();
   }
 
@@ -76,8 +71,12 @@ class NewTaskViewModel extends ChangeNotifier {
       repeat: _repeat,
       taskType: _taskType.name,
       location: _location,
-      alarm: _alarm,
+      alarm: _alarm.toString(),
     );
+
+    _tasks.add(newTask);
     debugPrint("Saved Task: ${newTask.toJson()}");
+
+    notifyListeners();
   }
 }
