@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:planus/components/custom_bottom_navigator.dart';
 import 'package:planus/views/home_screen.dart';
 import 'package:provider/provider.dart';
@@ -8,6 +6,7 @@ import 'package:table_calendar/table_calendar.dart';
 import '../viewmodels/new_task_viewmodel.dart';
 import '../components/custom_button.dart';
 import '../models/task_model.dart';
+import '../utils/format_time.dart';
 
 class NewTaskScreen extends StatelessWidget {
   const NewTaskScreen({super.key});
@@ -284,7 +283,7 @@ Widget _buildAlarmPicker(
     ),
     trailing: Text(
       viewModel.alarm != null
-          ? _formatAlarmTime(context, viewModel.alarm!)
+          ? formatTimeOfDay(context, viewModel.alarm!)
           : '未設定',
     ),
     onTap: () async {
@@ -294,7 +293,7 @@ Widget _buildAlarmPicker(
       );
 
       if (pickedTime != null && context.mounted) {
-        viewModel.setAlarm(context, pickedTime);
+        viewModel.setAlarm(pickedTime);
       }
     },
   );
@@ -312,15 +311,19 @@ Widget _buildTaskList(NewTaskViewModel viewModel) {
         final task = viewModel.tasks[index];
         return Card(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(
+              12,
+            ),
           ),
           child: ListTile(
-            title: Text(task.title),
+            title: Text(
+              task.title,
+            ),
             subtitle: Text(
               '${task.startTime} - ${task.endTime} / ${task.location ?? "未設定"}',
             ),
             trailing: Text(
-              task.repeat.toJson(),
+              task.repeat.name,
             ),
           ),
         );

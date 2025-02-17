@@ -47,7 +47,9 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
                 icon: Icons.calendar_today,
                 isSelected: widget.currentIndex == 1,
               ),
-              const SizedBox(width: 60), // floating button space
+              const SizedBox(
+                width: 60,
+              ),
               _buildTabIcon(
                 context,
                 index: 2,
@@ -82,28 +84,48 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
               }
             },
             backgroundColor: const Color(0xFFBCE4A3),
-            child: const Icon(Icons.add, size: 30, color: Colors.white),
+            child: const Icon(
+              Icons.add,
+              size: 30,
+              color: Colors.white,
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildTabIcon(BuildContext context,
-      {required int index, required IconData icon, required bool isSelected}) {
+  Widget _buildTabIcon(
+    BuildContext context, {
+    required int index,
+    required IconData icon,
+    required bool isSelected,
+  }) {
     return GestureDetector(
       onTap: () => widget.onTabSelected(index),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(8.0),
+        duration: const Duration(
+          milliseconds: 200,
+        ),
+        padding: const EdgeInsets.all(
+          8.0,
+        ),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFFFF3E0) : Colors.transparent,
+          color: isSelected
+              ? const Color(
+                  0xFFFFF3E0,
+                )
+              : Colors.transparent,
           shape: BoxShape.circle,
         ),
         child: Icon(
           icon,
           size: 30,
-          color: isSelected ? const Color(0xFFFFA726) : Colors.grey,
+          color: isSelected
+              ? const Color(
+                  0xFFFFA726,
+                )
+              : Colors.grey,
         ),
       ),
     );

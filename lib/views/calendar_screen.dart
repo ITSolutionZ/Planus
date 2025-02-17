@@ -4,7 +4,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:provider/provider.dart';
 import '../components/custom_bottom_navigator.dart';
 import '../viewmodels/new_task_viewmodel.dart';
-import '../models/task_model.dart';
+import '../models/task_model.dart' as model;
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -21,6 +21,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
   void initState() {
     super.initState();
     _selectedDay = _focusedDay;
+
+    // ✅ 캘린더 화면이 열릴 때 DB에서 일정 가져오기
+    Future.delayed(Duration.zero, () {
+      Provider.of<NewTaskViewModel>(context, listen: false).fetchTasks();
+    });
   }
 
   @override
@@ -44,16 +49,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications, color: Colors.black),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.person, color: Colors.black),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -98,29 +93,22 @@ class _CalendarScreenState extends State<CalendarScreen> {
               ),
             ),
             const SizedBox(height: 16),
+
+            // ✅ 일정 리스트 (Drift DB에서 가져오기)
             Expanded(
               child: Consumer<NewTaskViewModel>(
                 builder: (context, viewModel, _) {
                   final tasksForSelectedDate = viewModel.tasks
-                      .where((task) => isSameDay(
-                            DateTime(
-                              task.date.year,
-                              task.date.month,
-                              task.date.day,
-                            ),
-                            DateTime(
-                              _selectedDay!.year,
-                              _selectedDay!.month,
-                              _selectedDay!.day,
-                            ),
-                          ))
+                      .where(
+                        (task) => isSameDay(
+                          _parseDate(task.date), // ✅ String → DateTime 변환
+                          _selectedDay!,
+                        ),
+                      )
                       .toList();
 
                   if (tasksForSelectedDate.isEmpty) {
-                    return const Center(
-                        child: Text(
-                      "予定がありません",
-                    ));
+                    return const Center(child: Text("予定がありません"));
                   }
 
                   return ListView.builder(
@@ -136,32 +124,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(
-        currentIndex: 1,
-        onTabSelected: (index) {
-          if (index != 1) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) {
-                  if (index == 0) return const HomeScreen();
-                  if (index == 2) {
-                    return const Center(child: Text('Friends Page'));
-                  }
-                  if (index == 3) {
-                    return const Center(child: Text('Settings Page'));
-                  }
-                  return const HomeScreen();
-                },
-              ),
-            );
-          }
-        },
-      ),
     );
   }
 
-  Widget _buildTaskItem(Task task) {
+  // ✅ Task 아이템 빌드
+  Widget _buildTaskItem(model.Task task) {
     return Card(
       elevation: 3,
       shape: RoundedRectangleBorder(
@@ -175,11 +142,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
               width: 16,
               height: 16,
               decoration: BoxDecoration(
-                color: _getTaskColor(task.taskType),
+                color: _getTaskColor(
+                  _parseTaskType(
+                    task.taskType,
+                  ),
+                ),
                 shape: BoxShape.circle,
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(
+              width: 16,
+            ),
             Text(
               "${task.title} (${task.startTime} - ${task.endTime})",
               style: const TextStyle(
@@ -193,14 +166,42 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  Color _getTaskColor(String taskType) {
+  // ✅ Task 타입에 따라 색상 지정
+  Color _getTaskColor(model.TaskType taskType) {
     switch (taskType) {
-      case "読書":
+      case model.TaskType.reading:
         return Colors.orange;
-      case "勉強":
+      case model.TaskType.studying:
         return Colors.green;
       default:
         return Colors.blue;
     }
+  }
+
+  // ✅ String → DateTime 변환 함수
+  DateTime _parseDate(dynamic date) {
+    if (date is DateTime) return date;
+    try {
+      return DateTime.parse(date.toString());
+    } catch (e) {
+      return DateTime.now();
+    }
+  }
+
+  // ✅ String → TimeOfDay 변환 함수
+  TimeOfDay _parseTime(String time) {
+    try {
+      final parts = time.split(":");
+      return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+    } catch (e) {
+      return const TimeOfDay(hour: 0, minute: 0);
+    }
+  }
+
+  model.TaskType _parseTaskType(String taskType) {
+    return model.TaskType.values.firstWhere(
+      (e) => e.toString().split('.').last == taskType,
+      orElse: () => model.TaskType.reading, // 기본값
+    );
   }
 }
