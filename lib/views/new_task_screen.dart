@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:planus/components/custom_bottom_navigator.dart';
+import 'package:planus/views/calendar_screen.dart';
 import 'package:planus/views/home_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -8,8 +9,21 @@ import '../components/custom_button.dart';
 import '../models/task_model.dart';
 import '../utils/format_time.dart';
 
-class NewTaskScreen extends StatelessWidget {
+class NewTaskScreen extends StatefulWidget {
   const NewTaskScreen({super.key});
+
+  @override
+  _NewTaskScreenState createState() => _NewTaskScreenState();
+}
+
+class _NewTaskScreenState extends State<NewTaskScreen> {
+  final TextEditingController taskTitleController = TextEditingController();
+
+  @override
+  void dispose() {
+    taskTitleController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +33,7 @@ class NewTaskScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: const Text(
-          'カレンダー',
+          '日程を追加',
           style: TextStyle(
             color: Colors.black,
             fontSize: 24,
@@ -28,7 +42,7 @@ class NewTaskScreen extends StatelessWidget {
         ),
       ),
       body: ChangeNotifierProvider(
-        create: (_) => NewTaskViewModel(),
+        create: (_) => NewTaskViewModel()..fetchTasks(),
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(8.0),
           child: Consumer<NewTaskViewModel>(
@@ -37,47 +51,44 @@ class NewTaskScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildCalendar(context, viewModel),
-                  const SizedBox(
-                    height: 10,
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: taskTitleController,
+                    decoration: const InputDecoration(
+                      labelText: 'タスク名',
+                      border: OutlineInputBorder(),
+                    ),
                   ),
+                  const SizedBox(height: 10),
                   _buildTimePicker(
-                    context,
-                    'Starts',
-                    viewModel.startTime,
-                    true,
-                    viewModel,
-                  ),
+                      context, 'Starts', viewModel.startTime, true, viewModel),
                   _buildTimePicker(
-                    context,
-                    'Ends',
-                    viewModel.endTime,
-                    false,
-                    viewModel,
-                  ),
-                  _buildRepeatPicker(
-                    context,
-                    viewModel,
-                  ),
-                  _buildTaskTypePicker(
-                    context,
-                    viewModel,
-                  ),
-                  _buildLocationPicker(
-                    context,
-                    viewModel,
-                  ),
-                  _buildAlarmPicker(
-                    context,
-                    viewModel,
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
+                      context, 'Ends', viewModel.endTime, false, viewModel),
+                  _buildRepeatPicker(context, viewModel),
+                  _buildTaskTypePicker(context, viewModel),
+                  _buildLocationPicker(context, viewModel),
+                  _buildAlarmPicker(context, viewModel),
+                  const SizedBox(height: 20),
                   CustomButton(
                     text: 'Save',
                     onPressed: () {
-                      viewModel.saveTask();
-                      Navigator.pop(context);
+                      if (taskTitleController.text.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('タスク名を入力してください')),
+                        );
+                        return;
+                      }
+                      viewModel.saveTask(taskTitleController.text);
+                      Future.delayed(const Duration(milliseconds: 500), () {
+                        if (context.mounted) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const CalendarScreen(),
+                            ),
+                          );
+                        }
+                      });
                     },
                   ),
                 ],
@@ -95,20 +106,10 @@ class NewTaskScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) {
                   if (index == 0) return const HomeScreen();
-                  if (index == 2) {
-                    return const Center(
-                      child: Text(
-                        'Friends Page',
-                      ),
-                    ); // dummy page
-                  }
-                  if (index == 3) {
-                    return const Center(
-                      child: Text(
-                        'Settings Page',
-                      ),
-                    ); // dummy page
-                  }
+                  if (index == 2)
+                    return const Center(child: Text('Friends Page'));
+                  if (index == 3)
+                    return const Center(child: Text('Settings Page'));
                   return const HomeScreen();
                 },
               ),

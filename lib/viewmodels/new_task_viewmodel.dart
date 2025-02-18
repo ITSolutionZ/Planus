@@ -61,13 +61,11 @@ class NewTaskViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ✅ Drift DB에 Task 저장
-  Future<void> saveTask() async {
+  // DBにTaskを保存
+  Future<void> saveTask(String title) async {
     final newTask = database.TasksCompanion(
-      title: const Value("New Task"),
-      date: Value(_selectedDate
-          .toIso8601String()
-          .split('T')[0]), // ✅ DateTime → String 변환
+      title: Value(title),
+      date: Value(_selectedDate.toIso8601String().split('T')[0]),
       startTime: Value(_formatTime(_startTime)),
       endTime: Value(_formatTime(_endTime)),
       repeat: Value(_repeat.name),
@@ -78,10 +76,9 @@ class NewTaskViewModel extends ChangeNotifier {
     );
 
     await _database.insertTask(newTask);
-    await fetchTasks(); // ✅ 저장 후 즉시 UI 업데이트
+    await fetchTasks();
   }
 
-  // ✅ Drift DB에서 모든 Task 가져오기
   Future<void> fetchTasks() async {
     final fetchedTasks = await _database.getAllTasks();
 
@@ -93,7 +90,7 @@ class NewTaskViewModel extends ChangeNotifier {
                 _parseTime(
                   task.startTime,
                 ),
-              ), // ✅ TimeOfDay → String 변환
+              ),
               endTime: _formatTime(
                 _parseTime(
                   task.endTime,
@@ -113,7 +110,7 @@ class NewTaskViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-// ✅ HH:mm → TimeOfDay 변환 함수 추가
+// HH:mm → TimeOfDay 変換
   TimeOfDay _parseTime(String time) {
     final parts = time.split(':');
     if (parts.length == 2) {
@@ -124,12 +121,11 @@ class NewTaskViewModel extends ChangeNotifier {
     return const TimeOfDay(hour: 0, minute: 0);
   }
 
-  // ✅ TimeOfDay → HH:mm 변환
   String _formatTime(TimeOfDay time) {
     return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
   }
 
-  // ✅ 특정 날짜의 Task 가져오기
+  // 特定日の日程取得
   List<model.Task> getTasksForSelectedDate(DateTime selectedDay) {
     return _tasks.where((task) {
       final taskDate = task.date;

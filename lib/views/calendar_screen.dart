@@ -20,10 +20,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedDay = _focusedDay;
-
-    // ✅ 캘린더 화면이 열릴 때 DB에서 일정 가져오기
-    Future.delayed(Duration.zero, () {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<NewTaskViewModel>(context, listen: false).fetchTasks();
     });
   }
@@ -93,24 +90,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // ✅ 일정 리스트 (Drift DB에서 가져오기)
             Expanded(
               child: Consumer<NewTaskViewModel>(
                 builder: (context, viewModel, _) {
-                  final tasksForSelectedDate = viewModel.tasks
-                      .where(
-                        (task) => isSameDay(
-                          _parseDate(task.date), // ✅ String → DateTime 변환
-                          _selectedDay!,
-                        ),
-                      )
-                      .toList();
-
-                  if (tasksForSelectedDate.isEmpty) {
+                  if (viewModel.tasks.isEmpty) {
                     return const Center(child: Text("予定がありません"));
                   }
-
+                  final tasksForSelectedDate = viewModel.tasks
+                      .where((task) => isSameDay(
+                          _parseDate(task.date), _selectedDay ?? _focusedDay))
+                      .toList();
                   return ListView.builder(
                     itemCount: tasksForSelectedDate.length,
                     itemBuilder: (context, index) {
@@ -124,10 +113,29 @@ class _CalendarScreenState extends State<CalendarScreen> {
           ],
         ),
       ),
+      bottomNavigationBar: CustomBottomNavigationBar(
+        currentIndex: 1,
+        onTabSelected: (index) {
+          if (index != 1) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) {
+                  if (index == 0) return const HomeScreen();
+                  if (index == 2)
+                    return const Center(child: Text('Friends Page'));
+                  if (index == 3)
+                    return const Center(child: Text('Settings Page'));
+                  return const HomeScreen();
+                },
+              ),
+            );
+          }
+        },
+      ),
     );
   }
 
-  // ✅ Task 아이템 빌드
   Widget _buildTaskItem(model.Task task) {
     return Card(
       elevation: 3,
@@ -142,19 +150,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
               width: 16,
               height: 16,
               decoration: BoxDecoration(
-                color: _getTaskColor(
-                  _parseTaskType(
-                    task.taskType,
-                  ),
-                ),
+                color: _getTaskColor(_parseTaskType(task.taskType)),
                 shape: BoxShape.circle,
               ),
             ),
-            const SizedBox(
-              width: 16,
-            ),
+            const SizedBox(width: 16),
             Text(
-              "${task.title} (${task.startTime} - ${task.endTime})",
+              "${task.title ?? "未設定"} (${task.startTime ?? "00:00"} - ${task.endTime ?? "00:00"})",
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -166,7 +168,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  // ✅ Task 타입에 따라 색상 지정
   Color _getTaskColor(model.TaskType taskType) {
     switch (taskType) {
       case model.TaskType.reading:
@@ -178,7 +179,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }
   }
 
-  // ✅ String → DateTime 변환 함수
   DateTime _parseDate(dynamic date) {
     if (date is DateTime) return date;
     try {
@@ -188,20 +188,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }
   }
 
-  // ✅ String → TimeOfDay 변환 함수
-  TimeOfDay _parseTime(String time) {
-    try {
-      final parts = time.split(":");
-      return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
-    } catch (e) {
-      return const TimeOfDay(hour: 0, minute: 0);
-    }
-  }
-
   model.TaskType _parseTaskType(String taskType) {
     return model.TaskType.values.firstWhere(
       (e) => e.toString().split('.').last == taskType,
-      orElse: () => model.TaskType.reading, // 기본값
+      orElse: () => model.TaskType.reading,
     );
   }
 }
