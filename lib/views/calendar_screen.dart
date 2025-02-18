@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:planus/views/group_screen.dart';
 import 'package:planus/views/home_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:provider/provider.dart';
@@ -122,8 +123,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               MaterialPageRoute(
                 builder: (context) {
                   if (index == 0) return const HomeScreen();
-                  if (index == 2)
-                    return const Center(child: Text('Friends Page'));
+                  if (index == 2) return const GroupScreen();
                   if (index == 3)
                     return const Center(child: Text('Settings Page'));
                   return const HomeScreen();
