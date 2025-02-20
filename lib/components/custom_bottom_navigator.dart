@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:planus/views/calendar_screen.dart';
+import 'package:planus/views/group_screen.dart';
+import 'package:planus/views/home_screen.dart';
 import 'package:planus/views/new_task_screen.dart';
 
-class CustomBottomNavigationBar extends StatefulWidget {
+class CustomBottomNavigationBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTabSelected;
   final double fabPosition;
@@ -13,12 +16,6 @@ class CustomBottomNavigationBar extends StatefulWidget {
     this.fabPosition = 15,
   });
 
-  @override
-  _CustomBottomNavigationBarState createState() =>
-      _CustomBottomNavigationBarState();
-}
-
-class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -39,56 +36,42 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
                 context,
                 index: 0,
                 icon: Icons.home,
-                isSelected: widget.currentIndex == 0,
+                isSelected: currentIndex == 0,
               ),
               _buildTabIcon(
                 context,
                 index: 1,
                 icon: Icons.calendar_today,
-                isSelected: widget.currentIndex == 1,
+                isSelected: currentIndex == 1,
               ),
-              const SizedBox(
-                width: 60,
-              ),
+              const SizedBox(width: 60), // FAB 공간 확보
               _buildTabIcon(
                 context,
                 index: 2,
                 icon: Icons.people,
-                isSelected: widget.currentIndex == 2,
+                isSelected: currentIndex == 2,
               ),
               _buildTabIcon(
                 context,
                 index: 3,
                 icon: Icons.settings,
-                isSelected: widget.currentIndex == 3,
+                isSelected: currentIndex == 3,
               ),
             ],
           ),
         ),
-        // FAB button for new task
+        // ✅ FAB 버튼 클릭 시 NewTaskScreen으로 이동
         Positioned(
-          bottom: widget.fabPosition,
+          bottom: fabPosition,
           child: FloatingActionButton(
             onPressed: () {
-              // debugPrint('FAB button tapped');
-              if (context.mounted) {
-                // debugPrint('navigator is mounted');
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text('mounted & navigator waited')));
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const NewTaskScreen(),
-                  ),
-                );
-              }
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const NewTaskScreen()),
+              );
             },
             backgroundColor: const Color(0xFFBCE4A3),
-            child: const Icon(
-              Icons.add,
-              size: 30,
-              color: Colors.white,
-            ),
+            child: const Icon(Icons.add, size: 30, color: Colors.white),
           ),
         ),
       ],
@@ -102,30 +85,35 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
     required bool isSelected,
   }) {
     return GestureDetector(
-      onTap: () => widget.onTabSelected(index),
+      onTap: () {
+        if (index != currentIndex) {
+          // ✅ 현재 페이지가 아닐 때만 이동하도록 수정
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) {
+                if (index == 0) return const HomeScreen();
+                if (index == 1) return const CalendarScreen();
+                if (index == 2) return const GroupScreen();
+                if (index == 3)
+                  return const Center(child: Text('Settings Page'));
+                return const HomeScreen();
+              },
+            ),
+          );
+        }
+      },
       child: AnimatedContainer(
-        duration: const Duration(
-          milliseconds: 200,
-        ),
-        padding: const EdgeInsets.all(
-          8.0,
-        ),
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(8.0),
         decoration: BoxDecoration(
-          color: isSelected
-              ? const Color(
-                  0xFFFFF3E0,
-                )
-              : Colors.transparent,
+          color: isSelected ? const Color(0xFFFFF3E0) : Colors.transparent,
           shape: BoxShape.circle,
         ),
         child: Icon(
           icon,
           size: 30,
-          color: isSelected
-              ? const Color(
-                  0xFFFFA726,
-                )
-              : Colors.grey,
+          color: isSelected ? const Color(0xFFFFA726) : Colors.grey,
         ),
       ),
     );

@@ -20,7 +20,7 @@ class Tasks extends Table {
   BoolColumn get isCompleted => boolean().withDefault(const Constant(false))();
 }
 
-// db clas
+// db class
 @DriftDatabase(tables: [Tasks])
 class TaskDatabase extends _$TaskDatabase {
   TaskDatabase() : super(_openConnection());
@@ -35,6 +35,8 @@ class TaskDatabase extends _$TaskDatabase {
   Future<List<Task>> getTasksForDate(String selectedDate) {
     return (select(tasks)..where((tbl) => tbl.date.equals(selectedDate))).get();
   }
+
+  deleteTask(int taskId) {}
 }
 
 // db connection

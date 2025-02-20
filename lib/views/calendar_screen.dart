@@ -105,7 +105,31 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     itemCount: tasksForSelectedDate.length,
                     itemBuilder: (context, index) {
                       final task = tasksForSelectedDate[index];
-                      return _buildTaskItem(task);
+
+                      return Dismissible(
+                        key: UniqueKey(),
+                        direction: DismissDirection.endToStart,
+                        background: Container(
+                          color: Colors.red,
+                          alignment: Alignment.centerRight,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: const Icon(Icons.delete, color: Colors.white),
+                        ),
+                        onDismissed: (direction) async {
+                          final taskId = task.id;
+
+                          viewModel.deleteTask(taskId);
+
+                          setState(() {
+                            viewModel.tasks.removeWhere((t) => t.id == taskId);
+                          });
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('${task.title} が削除されました')),
+                          );
+                        },
+                        child: _buildTaskItem(task, viewModel),
+                      );
                     },
                   );
                 },
@@ -136,33 +160,52 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  Widget _buildTaskItem(model.Task task) {
-    return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+  Widget _buildTaskItem(model.Task task, NewTaskViewModel viewModel) {
+    return Dismissible(
+      key: Key(task.id.toString()), // ✅ 각 태스크를 식별하는 Key 필요
+      direction: DismissDirection.endToStart, // ✅ 오른쪽 → 왼쪽으로 스와이프 가능
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 16),
+        decoration: BoxDecoration(
+          color: Colors.redAccent,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Icon(Icons.delete, color: Colors.white),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Row(
-          children: [
-            Container(
-              width: 16,
-              height: 16,
-              decoration: BoxDecoration(
-                color: _getTaskColor(_parseTaskType(task.taskType)),
-                shape: BoxShape.circle,
+      onDismissed: (direction) {
+        viewModel.deleteTask(task.id);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("${task.title} を削除しました")),
+        );
+      },
+      child: Card(
+        elevation: 3,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
+            children: [
+              Container(
+                width: 16,
+                height: 16,
+                decoration: BoxDecoration(
+                  color: _getTaskColor(_parseTaskType(task.taskType)),
+                  shape: BoxShape.circle,
+                ),
               ),
-            ),
-            const SizedBox(width: 16),
-            Text(
-              "${task.title ?? "未設定"} (${task.startTime ?? "00:00"} - ${task.endTime ?? "00:00"})",
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+              const SizedBox(width: 16),
+              Text(
+                "${task.title} (${task.startTime} - ${task.endTime})",
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -15,7 +15,7 @@ class NewTaskViewModel extends ChangeNotifier {
   TimeOfDay? _alarm;
   List<model.Task> _tasks = []; // ✅ 수정: model.Task 리스트를 사용
 
-  // ✅ Getter
+  //  Getter
   DateTime get selectedDate => _selectedDate;
   List<model.Task> get tasks => _tasks;
   TimeOfDay get startTime => _startTime;
@@ -25,7 +25,7 @@ class NewTaskViewModel extends ChangeNotifier {
   String? get location => _location;
   TimeOfDay? get alarm => _alarm;
 
-  // ✅ Setter
+  //  Setter
   void setDate(DateTime date) {
     _selectedDate = date;
     notifyListeners();
@@ -104,6 +104,7 @@ class NewTaskViewModel extends ChangeNotifier {
               location: task.location,
               alarm: task.alarm,
               isCompleted: task.isCompleted,
+              id: task.id,
             ))
         .toList();
 
@@ -138,5 +139,10 @@ class NewTaskViewModel extends ChangeNotifier {
       (e) => e.toString().split('.').last == taskType,
       orElse: () => model.TaskType.reading,
     );
+  }
+
+  void deleteTask(int taskId) async {
+    await _database.deleteTask(taskId);
+    await fetchTasks();
   }
 }

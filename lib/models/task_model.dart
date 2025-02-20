@@ -41,6 +41,7 @@ extension TaskTypeExtension on TaskType {
 }
 
 class Task {
+  final int id;
   final String title;
   final DateTime date;
   final String startTime;
@@ -52,6 +53,7 @@ class Task {
   bool isCompleted;
 
   Task({
+    required this.id,
     required this.title,
     required this.date,
     required this.startTime,
@@ -91,21 +93,23 @@ class Task {
   // JSONに 変更
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'title': title,
       'date': date.toIso8601String(),
       'startTime': startTime,
       'endTime': endTime,
-      'repeat': repeat,
+      'repeat': repeat.toJson(),
       'taskType': taskType,
       'location': location,
       'alarm': alarm,
-      'isCompleted': isCompleted,
+      'isCompleted': isCompleted ? 1 : 0,
     };
   }
 
   // JSONでモデル作成
   factory Task.fromJson(Map<String, dynamic> json) {
     return Task(
+      id: json['id'],
       title: json['title'],
       date: DateTime.parse(json['date']),
       startTime: json['startTime'],
@@ -114,7 +118,7 @@ class Task {
       taskType: json['taskType'],
       location: json['location'],
       alarm: json['alarm'],
-      isCompleted: json['isCompleted'] ?? false,
+      isCompleted: json['isCompleted'] == 1,
     );
   }
 
