@@ -12,12 +12,12 @@ class OnboardingScreen extends StatelessWidget {
   // onboarding page data
   final List<Map<String, String>> _onboardingData = [
     {
-      'image': 'assets/study_plan.png',
+      'image': 'assets/images/illust1.png',
       'title': '学習プランや読書プラン',
       'description': '自分のプランを立ててみんなに共有しましょう',
     },
     {
-      'image': 'assets/goal_achievement.png',
+      'image': 'assets/images/illust2.png',
       'title': '自分のゴールを達成しよう',
       'description': '達成したゴールをみんなに褒めてもらおう',
     },
@@ -26,7 +26,9 @@ class OnboardingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => OnboardingViewModel(totalPages: 3),
+      create: (_) => OnboardingViewModel(
+        totalPages: 3,
+      ),
       child: Scaffold(
         backgroundColor: const Color(0xFFFDF3E7),
         body: Column(
@@ -71,7 +73,8 @@ class OnboardingScreen extends StatelessWidget {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const LoginScreen()),
+                            builder: (context) => const LoginScreen(),
+                          ),
                         );
                       }
                     },
@@ -90,12 +93,19 @@ class OnboardingScreen extends StatelessWidget {
       required String title,
       required String description}) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(
+        16.0,
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.asset(image, height: 200),
-          const SizedBox(height: 32),
+          Image.asset(
+            image,
+            height: 200,
+          ),
+          const SizedBox(
+            height: 32,
+          ),
           Text(
             title,
             style: const TextStyle(
@@ -103,7 +113,9 @@ class OnboardingScreen extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(
+            height: 16,
+          ),
           Text(
             description,
             textAlign: TextAlign.center,

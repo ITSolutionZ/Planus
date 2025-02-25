@@ -44,7 +44,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
                 icon: Icons.calendar_today,
                 isSelected: currentIndex == 1,
               ),
-              const SizedBox(width: 60), // FAB 공간 확보
+              const SizedBox(width: 60),
               _buildTabIcon(
                 context,
                 index: 2,
@@ -60,14 +60,15 @@ class CustomBottomNavigationBar extends StatelessWidget {
             ],
           ),
         ),
-        // ✅ FAB 버튼 클릭 시 NewTaskScreen으로 이동
         Positioned(
           bottom: fabPosition,
           child: FloatingActionButton(
             onPressed: () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => const NewTaskScreen()),
+                MaterialPageRoute(
+                  builder: (context) => const NewTaskScreen(),
+                ),
               );
             },
             backgroundColor: const Color(0xFFBCE4A3),

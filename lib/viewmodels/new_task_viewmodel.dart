@@ -13,8 +13,11 @@ class NewTaskViewModel extends ChangeNotifier {
   model.TaskType _taskType = model.TaskType.reading;
   String? _location;
   TimeOfDay? _alarm;
-  List<model.Task> _tasks = []; // ✅ 수정: model.Task 리스트를 사용
+  List<model.Task> _tasks = [];
 
+  NewTaskViewModel() {
+    fetchTasks();
+  }
   //  Getter
   DateTime get selectedDate => _selectedDate;
   List<model.Task> get tasks => _tasks;
@@ -99,7 +102,7 @@ class NewTaskViewModel extends ChangeNotifier {
               repeat: model.Repeat.values.firstWhere(
                 (e) => e.name == task.repeat,
                 orElse: () => model.Repeat.none,
-              ), // ✅ Enum 변환
+              ),
               taskType: task.taskType,
               location: task.location,
               alarm: task.alarm,
@@ -107,7 +110,6 @@ class NewTaskViewModel extends ChangeNotifier {
               id: task.id,
             ))
         .toList();
-
     notifyListeners();
   }
 

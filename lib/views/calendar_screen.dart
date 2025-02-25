@@ -54,15 +54,30 @@ class _CalendarScreenState extends State<CalendarScreen> {
           children: [
             Card(
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(
+                  16,
+                ),
               ),
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(
+                  16.0,
+                ),
                 child: TableCalendar(
-                  firstDay: DateTime.utc(2020, 1, 1),
-                  lastDay: DateTime.utc(2030, 12, 31),
+                  firstDay: DateTime.utc(
+                    2020,
+                    1,
+                    1,
+                  ),
+                  lastDay: DateTime.utc(
+                    2030,
+                    12,
+                    31,
+                  ),
                   focusedDay: _focusedDay,
-                  selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                  selectedDayPredicate: (day) => isSameDay(
+                    _selectedDay,
+                    day,
+                  ),
                   onDaySelected: (selectedDay, focusedDay) {
                     setState(() {
                       _selectedDay = selectedDay;
@@ -72,10 +87,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   headerStyle: const HeaderStyle(
                     formatButtonVisible: false,
                     titleCentered: true,
-                    leftChevronIcon:
-                        Icon(Icons.chevron_left, color: Colors.orange),
-                    rightChevronIcon:
-                        Icon(Icons.chevron_right, color: Colors.orange),
+                    leftChevronIcon: Icon(
+                      Icons.chevron_left,
+                      color: Colors.orange,
+                    ),
+                    rightChevronIcon: Icon(
+                      Icons.chevron_right,
+                      color: Colors.orange,
+                    ),
                   ),
                   calendarStyle: CalendarStyle(
                     todayDecoration: BoxDecoration(
@@ -95,11 +114,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
               child: Consumer<NewTaskViewModel>(
                 builder: (context, viewModel, _) {
                   if (viewModel.tasks.isEmpty) {
-                    return const Center(child: Text("予定がありません"));
+                    return const Center(
+                      child: Text(
+                        "予定がありません",
+                      ),
+                    );
                   }
                   final tasksForSelectedDate = viewModel.tasks
-                      .where((task) => isSameDay(
-                          _parseDate(task.date), _selectedDay ?? _focusedDay))
+                      .where(
+                        (task) => isSameDay(
+                            _parseDate(task.date), _selectedDay ?? _focusedDay),
+                      )
                       .toList();
                   return ListView.builder(
                     itemCount: tasksForSelectedDate.length,
@@ -112,8 +137,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         background: Container(
                           color: Colors.red,
                           alignment: Alignment.centerRight,
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: const Icon(Icons.delete, color: Colors.white),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                          ),
+                          child: const Icon(
+                            Icons.delete,
+                            color: Colors.white,
+                          ),
                         ),
                         onDismissed: (direction) async {
                           final taskId = task.id;
@@ -125,7 +155,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           });
 
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('${task.title} が削除されました')),
+                            SnackBar(
+                              content: Text('${task.title} が削除されました'),
+                            ),
                           );
                         },
                         child: _buildTaskItem(task, viewModel),
@@ -147,9 +179,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
               MaterialPageRoute(
                 builder: (context) {
                   if (index == 0) return const HomeScreen();
+                  if (index == 1) return const CalendarScreen();
                   if (index == 2) return const GroupScreen();
-                  if (index == 3)
-                    return const Center(child: Text('Settings Page'));
+                  if (index == 3) {
+                    return const Center(
+                      child: Text(
+                        'Settings Page',
+                      ),
+                    );
+                  }
                   return const HomeScreen();
                 },
               ),
@@ -162,21 +200,32 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   Widget _buildTaskItem(model.Task task, NewTaskViewModel viewModel) {
     return Dismissible(
-      key: Key(task.id.toString()), // ✅ 각 태스크를 식별하는 Key 필요
-      direction: DismissDirection.endToStart, // ✅ 오른쪽 → 왼쪽으로 스와이프 가능
+      key: Key(
+        task.id.toString(),
+      ),
+      direction: DismissDirection.endToStart,
       background: Container(
         alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 16),
+        padding: const EdgeInsets.only(
+          right: 16,
+        ),
         decoration: BoxDecoration(
           color: Colors.redAccent,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(
+            8,
+          ),
         ),
-        child: const Icon(Icons.delete, color: Colors.white),
+        child: const Icon(
+          Icons.delete,
+          color: Colors.white,
+        ),
       ),
       onDismissed: (direction) {
         viewModel.deleteTask(task.id);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("${task.title} を削除しました")),
+          SnackBar(
+            content: Text("${task.title} を削除しました"),
+          ),
         );
       },
       child: Card(
@@ -192,7 +241,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 width: 16,
                 height: 16,
                 decoration: BoxDecoration(
-                  color: _getTaskColor(_parseTaskType(task.taskType)),
+                  color: _getTaskColor(
+                    _parseTaskType(task.taskType),
+                  ),
                   shape: BoxShape.circle,
                 ),
               ),

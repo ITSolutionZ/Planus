@@ -36,7 +36,9 @@ class TaskDatabase extends _$TaskDatabase {
     return (select(tasks)..where((tbl) => tbl.date.equals(selectedDate))).get();
   }
 
-  deleteTask(int taskId) {}
+  Future<int> deleteTask(int taskId) {
+    return (delete(tasks)..where((tbl) => tbl.id.equals(taskId))).go();
+  }
 }
 
 // db connection

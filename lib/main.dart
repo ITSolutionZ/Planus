@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:planus/views/group_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:planus/views/home_screen.dart';
 import 'package:planus/views/calendar_screen.dart';
@@ -21,7 +22,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => NewTaskViewModel()),
+        ChangeNotifierProvider(
+          create: (_) => NewTaskViewModel(),
+        ),
       ],
       child: const MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -44,8 +47,10 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _pages = [
     const HomeScreen(),
     const CalendarScreen(),
-    const Center(child: Text('Groups Page')),
-    const Center(child: Text('Settings Page')),
+    const GroupScreen(),
+    const Center(
+      child: Text('Settings Page'),
+    ),
   ];
 
   @override

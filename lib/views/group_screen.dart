@@ -75,8 +75,9 @@ class _GroupScreenState extends State<GroupScreen> {
                 builder: (context) {
                   if (index == 0) return const HomeScreen();
                   if (index == 2) return const GroupScreen();
-                  if (index == 3)
+                  if (index == 3) {
                     return const Center(child: Text('Settings Page'));
+                  }
                   return const HomeScreen();
                 },
               ),

@@ -23,7 +23,9 @@ class _SplashScreenState extends State<SplashScreen>
     //　アニメーション初期化
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 1), // 1秒間のアニメーション
+      duration: const Duration(
+        seconds: 1,
+      ), // 1秒間のアニメーション
     );
 
     _fadeAnimation = CurvedAnimation(
@@ -39,7 +41,9 @@ class _SplashScreenState extends State<SplashScreen>
         if (mounted) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => OnboardingScreen()),
+            MaterialPageRoute(
+              builder: (context) => OnboardingScreen(),
+            ),
           );
         }
       });
@@ -59,28 +63,24 @@ class _SplashScreenState extends State<SplashScreen>
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnimation,
-          child: const Column(
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
             children: [
-              Icon(
-                Icons.create,
-                size: 100,
-                color: Colors.black,
-              ), // 로고
-              SizedBox(height: 16),
-              Text(
-                'Plan Us',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                ),
+              const Spacer(),
+              Image.asset(
+                'assets/images/logo.png',
+                width: 150,
               ),
-              Spacer(),
-              Text(
+              const SizedBox(
+                height: 16,
+              ),
+              const Spacer(),
+              const Text(
                 'Copyrights 2025. ITSolutions. All rights reserved.',
                 style: TextStyle(fontSize: 12, color: Colors.grey),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 36),
             ],
           ),
         ),

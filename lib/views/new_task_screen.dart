@@ -18,7 +18,15 @@ class NewTaskScreen extends StatefulWidget {
 }
 
 class _NewTaskScreenState extends State<NewTaskScreen> {
+  // ignore: prefer_final_fields
+  CalendarFormat _calendarFormat = CalendarFormat.month;
   final TextEditingController taskTitleController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() => context.read<NewTaskViewModel>().fetchTasks());
+  }
 
   @override
   void dispose() {
@@ -43,7 +51,8 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
         ),
       ),
       body: ChangeNotifierProvider(
-        create: (_) => NewTaskViewModel()..fetchTasks(),
+        create: (context) => NewTaskViewModel(),
+        lazy: false,
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(8.0),
           child: Consumer<NewTaskViewModel>(
@@ -51,7 +60,7 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildCalendar(context, viewModel),
+                  _buildCalendar(viewModel),
                   const SizedBox(height: 10),
                   TextField(
                     controller: taskTitleController,
@@ -75,7 +84,10 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
                     onPressed: () {
                       if (taskTitleController.text.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('タスク名を入力してください')),
+                          const SnackBar(
+                              content: Text(
+                            'タスク名を入力してください',
+                          )),
                         );
                         return;
                       }
@@ -119,216 +131,230 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
       ),
     );
   }
-}
 
-Widget _buildCalendar(BuildContext context, NewTaskViewModel viewModel) {
-  return Card(
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-    child: Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: TableCalendar(
-        availableGestures: AvailableGestures.horizontalSwipe,
-        headerStyle: const HeaderStyle(
-          formatButtonVisible: false,
-          titleCentered: true,
-          headerPadding: EdgeInsets.symmetric(
-            vertical: 4,
-          ),
+  Widget _buildCalendar(NewTaskViewModel viewModel) {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(
+          16,
         ),
-        calendarStyle: const CalendarStyle(
-          outsideDaysVisible: false,
-          todayDecoration: BoxDecoration(
-            color: Colors.orangeAccent,
-            shape: BoxShape.circle,
-          ),
-          selectedDecoration: BoxDecoration(
-            color: Colors.greenAccent,
-            shape: BoxShape.circle,
-          ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(
+          16.0,
         ),
-        firstDay: DateTime.utc(2023, 1, 1),
-        lastDay: DateTime.utc(2100, 12, 31),
-        focusedDay: viewModel.selectedDate,
-        selectedDayPredicate: (day) => isSameDay(
-          viewModel.selectedDate,
-          day,
-        ),
-        onDaySelected: (selectedDay, focusedDay) {
-          viewModel.setDate(selectedDay);
-        },
-        onPageChanged: (focusday) {
-          viewModel.setDate(focusday);
-        },
-      ),
-    ),
-  );
-}
-
-Widget _buildTimePicker(BuildContext context, String label, TimeOfDay time,
-    bool isStart, NewTaskViewModel viewModel) {
-  return ListTile(
-    title: Text(
-      label,
-      style: const TextStyle(
-        color: Colors.orange,
-      ),
-    ),
-    trailing: Text(time.format(context)),
-    onTap: () async {
-      TimeOfDay? pickedTime = await showTimePicker(
-        context: context,
-        initialTime: time,
-      );
-      if (pickedTime != null) {
-        isStart
-            ? viewModel.setStartTime(pickedTime)
-            : viewModel.setEndTime(pickedTime);
-      }
-    },
-  );
-}
-
-Widget _buildRepeatPicker(BuildContext context, NewTaskViewModel viewModel) {
-  return ListTile(
-    title: const Text(
-      'Repeat',
-      style: TextStyle(
-        color: Colors.orange,
-      ),
-    ),
-    trailing: DropdownButton<Repeat>(
-      value: viewModel.repeat,
-      items: Repeat.values
-          .map(
-            (repeat) => DropdownMenuItem(
-              value: repeat,
-              child: Text(repeat.name),
+        child: TableCalendar(
+          availableGestures: AvailableGestures.horizontalSwipe,
+          headerStyle: const HeaderStyle(
+            formatButtonVisible: false,
+            titleCentered: true,
+            headerPadding: EdgeInsets.symmetric(
+              vertical: 4,
             ),
-          )
-          .toList(),
-      onChanged: (value) {
-        if (value != null) viewModel.setRepeat(value);
+          ),
+          calendarStyle: const CalendarStyle(
+            outsideDaysVisible: false,
+            todayDecoration: BoxDecoration(
+              color: Colors.orangeAccent,
+              shape: BoxShape.circle,
+            ),
+            selectedDecoration: BoxDecoration(
+              color: Colors.greenAccent,
+              shape: BoxShape.circle,
+            ),
+          ),
+          firstDay: DateTime.utc(2023, 1, 1),
+          lastDay: DateTime.utc(2100, 12, 31),
+          focusedDay: viewModel.selectedDate,
+          calendarFormat: _calendarFormat,
+          selectedDayPredicate: (day) => isSameDay(
+            viewModel.selectedDate,
+            day,
+          ),
+          onDaySelected: (selectedDay, focusedDay) {
+            setState(() {
+              viewModel.setDate(selectedDay);
+              _calendarFormat = CalendarFormat.week;
+            });
+          },
+          onPageChanged: (focusedDay) {
+            setState(() {
+              viewModel.setDate(focusedDay);
+              _calendarFormat = CalendarFormat.month;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimePicker(BuildContext context, String label, TimeOfDay time,
+      bool isStart, NewTaskViewModel viewModel) {
+    return ListTile(
+      title: Text(
+        label,
+        style: const TextStyle(
+          color: Colors.orange,
+        ),
+      ),
+      trailing: Text(time.format(context)),
+      onTap: () async {
+        TimeOfDay? pickedTime = await showTimePicker(
+          context: context,
+          initialTime: time,
+        );
+        if (pickedTime != null) {
+          isStart
+              ? viewModel.setStartTime(pickedTime)
+              : viewModel.setEndTime(pickedTime);
+        }
       },
-    ),
-  );
-}
+    );
+  }
 
-Widget _buildTaskTypePicker(BuildContext context, NewTaskViewModel viewModel) {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-    children: [
-      _buildTaskTypeButton(
-        context,
-        TaskType.reading,
-        Colors.orange,
-        viewModel,
+  Widget _buildRepeatPicker(BuildContext context, NewTaskViewModel viewModel) {
+    return ListTile(
+      title: const Text(
+        'Repeat',
+        style: TextStyle(
+          color: Colors.orange,
+        ),
       ),
-      _buildTaskTypeButton(
-        context,
-        TaskType.studying,
-        Colors.green,
-        viewModel,
+      trailing: DropdownButton<Repeat>(
+        value: viewModel.repeat,
+        items: Repeat.values
+            .map(
+              (repeat) => DropdownMenuItem(
+                value: repeat,
+                child: Text(repeat.name),
+              ),
+            )
+            .toList(),
+        onChanged: (value) {
+          if (value != null) viewModel.setRepeat(value);
+        },
       ),
-    ],
-  );
-}
+    );
+  }
 
-Widget _buildTaskTypeButton(
-  BuildContext context,
-  TaskType type,
-  Color color,
-  NewTaskViewModel viewModel,
-) {
-  return ElevatedButton(
-    onPressed: () => viewModel.setTaskType(type),
-    style: ElevatedButton.styleFrom(
-      backgroundColor: color,
-    ),
-    child: Text(
-      type.name,
-    ),
-  );
-}
+  Widget _buildTaskTypePicker(
+      BuildContext context, NewTaskViewModel viewModel) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        _buildTaskTypeButton(
+          context,
+          TaskType.reading,
+          Colors.orange,
+          viewModel,
+        ),
+        _buildTaskTypeButton(
+          context,
+          TaskType.studying,
+          Colors.green,
+          viewModel,
+        ),
+      ],
+    );
+  }
 
-Widget _buildLocationPicker(
-  BuildContext context,
-  NewTaskViewModel viewModel,
-) {
-  return ListTile(
-    title: const Text(
-      '場所選択',
-      style: TextStyle(
-        color: Colors.orange,
+  Widget _buildTaskTypeButton(
+    BuildContext context,
+    TaskType type,
+    Color color,
+    NewTaskViewModel viewModel,
+  ) {
+    return ElevatedButton(
+      onPressed: () => viewModel.setTaskType(type),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
       ),
-    ),
-    trailing: Text(
-      viewModel.location ?? '未設定',
-    ),
-    onTap: () async {
-      viewModel.setLocation('指定した場所');
-    },
-  );
-}
+      child: Text(
+        type.name,
+      ),
+    );
+  }
+
+  Widget _buildLocationPicker(
+    BuildContext context,
+    NewTaskViewModel viewModel,
+  ) {
+    return ListTile(
+      title: const Text(
+        '場所選択',
+        style: TextStyle(
+          color: Colors.orange,
+        ),
+      ),
+      trailing: Text(
+        viewModel.location ?? '未設定',
+      ),
+      onTap: () async {
+        viewModel.setLocation('指定した場所');
+      },
+    );
+  }
 
 // 現在、AlarmはString型で保存されているため、TimeOfDay型に変換する必要がある。
-Widget _buildAlarmPicker(
-  BuildContext context,
-  NewTaskViewModel viewModel,
-) {
-  return ListTile(
-    title: const Text(
-      'アラーム',
-      style: TextStyle(
-        color: Colors.orange,
+  Widget _buildAlarmPicker(
+    BuildContext context,
+    NewTaskViewModel viewModel,
+  ) {
+    return ListTile(
+      title: const Text(
+        'アラーム',
+        style: TextStyle(
+          color: Colors.orange,
+        ),
       ),
-    ),
-    trailing: Text(
-      viewModel.alarm != null
-          ? formatTimeOfDay(context, viewModel.alarm!)
-          : '未設定',
-    ),
-    onTap: () async {
-      TimeOfDay? pickedTime = await showTimePicker(
-        context: context,
-        initialTime: viewModel.alarm ?? TimeOfDay.now(),
-      );
-
-      if (pickedTime != null && context.mounted) {
-        viewModel.setAlarm(pickedTime);
-      }
-    },
-  );
-}
-
-String _formatAlarmTime(BuildContext context, TimeOfDay alarm) {
-  return alarm.format(context);
-}
-
-Widget _buildTaskList(NewTaskViewModel viewModel) {
-  return Expanded(
-    child: ListView.builder(
-      itemCount: viewModel.tasks.length,
-      itemBuilder: (context, index) {
-        final task = viewModel.tasks[index];
-        return Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(
-              12,
-            ),
-          ),
-          child: ListTile(
-            title: Text(
-              task.title,
-            ),
-            subtitle: Text(
-              '${task.startTime} - ${task.endTime} / ${task.location ?? "未設定"}',
-            ),
-            trailing: Text(
-              task.repeat.name,
-            ),
-          ),
+      trailing: Text(
+        viewModel.alarm != null
+            ? formatTimeOfDay(context, viewModel.alarm!)
+            : '未設定',
+      ),
+      onTap: () async {
+        TimeOfDay? pickedTime = await showTimePicker(
+          context: context,
+          initialTime: viewModel.alarm ?? TimeOfDay.now(),
         );
+
+        if (pickedTime != null && context.mounted) {
+          viewModel.setAlarm(pickedTime);
+        }
       },
-    ),
-  );
+    );
+  }
+
+  String _formatAlarmTime(BuildContext context, TimeOfDay alarm) {
+    return alarm.format(context);
+  }
+
+  Widget _buildTaskList(NewTaskViewModel viewModel) {
+    return Expanded(
+      child: ListView.builder(
+        itemCount: viewModel.tasks.length,
+        itemBuilder: (context, index) {
+          final task = viewModel.tasks[index];
+          return Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(
+                12,
+              ),
+            ),
+            child: ListTile(
+              title: Text(
+                task.title,
+              ),
+              subtitle: Text(
+                '${task.startTime} - ${task.endTime} / ${task.location ?? "未設定"}',
+              ),
+              trailing: Text(
+                task.repeat.name,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
 }
