@@ -28,7 +28,14 @@ class TaskDatabase extends _$TaskDatabase {
   @override
   int get schemaVersion => 1;
 
-  Future<int> insertTask(TasksCompanion task) => into(tasks).insert(task);
+  Future<int> insertTask(TasksCompanion task) async {
+    try {
+      return await into(tasks).insert(task);
+    } catch (e) {
+      print('Error inserting task: $e');
+      return -1;
+    }
+  }
 
   Future<List<Task>> getAllTasks() => select(tasks).get();
 

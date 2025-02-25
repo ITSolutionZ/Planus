@@ -74,7 +74,7 @@ class Task {
     }
 
     // 開始時間が終了時間より後であることを確認
-    if (_compareTimes(startTime, endTime) >= 0) {
+    if (_compareTimes(startTime, endTime) > 0) {
       throw ArgumentError('endTimeは startTime 以降');
     }
   }

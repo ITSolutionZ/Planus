@@ -79,6 +79,7 @@ class NewTaskViewModel extends ChangeNotifier {
     );
 
     await _database.insertTask(newTask);
+    print("Task created");
     await fetchTasks();
   }
 

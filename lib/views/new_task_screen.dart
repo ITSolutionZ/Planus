@@ -264,15 +264,24 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
     Color color,
     NewTaskViewModel viewModel,
   ) {
-    return ElevatedButton(
-      onPressed: () => viewModel.setTaskType(type),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-      ),
-      child: Text(
-        type.name,
-      ),
-    );
+    bool isSelected = viewModel.taskType == type;
+    isSelected
+        ? ElevatedButton(
+            onPressed: () => viewModel.setTaskType(type),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isSelected ? color : Colors.grey[300],
+              elevation: isSelected ? 4.0 : 0,
+            ),
+            child: Text(
+              type.name,
+              style: TextStyle(
+                color: isSelected ? Colors.white : Colors.black26,
+              ),
+            ),
+          )
+        : OutlinedButton(
+            onPressed: () => viewModel.setTaskType(type),
+            child: const Text('aaa'));
   }
 
   Widget _buildLocationPicker(
